@@ -1,0 +1,15 @@
+{
+	"settings": {
+		"maxCollisionMargin": 0.05,
+		"maxResidualPenetration": 0.001,
+		"maxSolverIterations": 1000
+	},
+	
+	"domainSize": [300,300],
+	"concentration": 100,
+	"bodies": [
+		{
+			"points": [-5,-5,5,-5,5,5,-5,5]
+		}
+	]
+}
