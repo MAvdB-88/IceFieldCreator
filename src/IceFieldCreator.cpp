@@ -295,6 +295,9 @@ double   IceFieldCreator::handleColMarginInput(double marginRatio, double prevMa
     {
         double margin = m_settings.maxCollisionMargin * marginRatio;
 
+        //Zero margin results in inaccuracy in contacts.
+        if (margin < 0.5*m_settings.maxResidualPenetration) margin = 0.5*m_settings.maxResidualPenetration;
+
         for (int i = 0; i < m_bodyVec->size(); i++)
         {
             Body& body = m_bodyVec->at(i);
