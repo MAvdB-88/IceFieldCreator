@@ -53,8 +53,8 @@ public:
     bool removeParticle(int id);
     bool updateParticle(int id, Vector2 lowerBound, Vector2 upperBound);
 
-    std::vector<int> query(int id);
-    std::vector<int> query(const AABB& aabb);
+    std::vector<int> query(int id) const;
+    std::vector<int> query(const AABB& aabb) const;
 
     const AABB& getAABB(int id);
 
@@ -69,7 +69,7 @@ public:
 
 private:
 
-    std::vector<int> query(int id, const AABB& aabb);
+    std::vector<int> query(int id, const AABB& aabb) const;
 
     int   allocateNode();
     void  freeNode(int);

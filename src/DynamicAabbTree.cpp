@@ -218,7 +218,7 @@ bool DynamicAabbTree::updateParticle(int particle, Vector2 lowerBound, Vector2 u
     return true;
 }
 
-std::vector<int> DynamicAabbTree::query(int particle)
+std::vector<int> DynamicAabbTree::query(int particle) const
 {
     // Make sure that this is a valid particle.
     if (m_particleMap.count(particle) == 0)
@@ -231,7 +231,7 @@ std::vector<int> DynamicAabbTree::query(int particle)
     return query(particle, m_nodes[m_particleMap.find(particle)->second].aabb);
 }
 
-std::vector<int> DynamicAabbTree::query(int particle, const AABB& aabb)
+std::vector<int> DynamicAabbTree::query(int particle, const AABB& aabb) const
 {
     std::vector<int> stack;
     stack.reserve(256);
@@ -270,7 +270,7 @@ std::vector<int> DynamicAabbTree::query(int particle, const AABB& aabb)
     return particles;
 }
 
-std::vector<int> DynamicAabbTree::query(const AABB& aabb)
+std::vector<int> DynamicAabbTree::query(const AABB& aabb) const
 {
     // Make sure the tree isn't empty.
     if (m_particleMap.size() == 0)

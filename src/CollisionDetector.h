@@ -39,7 +39,7 @@ public:
     CollisionDetector(std::shared_ptr<BodyVec> bodyVec);
     std::vector<Contact> getContacts(double* maxPenetration = NULL);
 
-    int bodyAtPos(Vector2 position);
+    int bodyAtPos(Vector2 position) const;
 
 private:
 
@@ -50,7 +50,7 @@ private:
     std::vector<Contact> CollisionDetector::processContacts(const std::set<IndexPair>& indexPairs,
         double* maxPenetration = NULL); 
 
-    //Dynamic AABB tree
+
     DynamicAabbTree m_dynamicAABBTree;
     std::shared_ptr<BodyVec> m_bodyVec;
 };

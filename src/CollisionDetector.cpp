@@ -61,7 +61,7 @@ bool sortHighLow(int i, int j) { return (i > j); }
 }
 
 
-int CollisionDetector::bodyAtPos(Vector2 position)
+int CollisionDetector::bodyAtPos(Vector2 position) const
 {
     AABB aabb(position, position);
     std::vector<int> potentialBodies = m_dynamicAABBTree.query(aabb);
