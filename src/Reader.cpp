@@ -81,7 +81,7 @@ bool readIntFromObj(const rapidjson::Value& obj, std::string member, int* val)
     }
     if (!(obj[member.c_str()].IsDouble() || obj[member.c_str()].IsInt64()))
     {
-        ErrLog::log("Error: member " + member + "is not a double.");
+        ErrLog::log("Error: member " + member + "is not an int or double.");
         return false;
     }
 

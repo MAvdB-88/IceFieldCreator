@@ -1,6 +1,6 @@
 {
 	"settings": {
-		"maxCollisionMargin": 0.05,
+		"maxCollisionMargin": 0.4,
 		"maxResidualPenetration": 0.001,
 		"maxSolverIterations": 1000
 	},
