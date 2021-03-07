@@ -45,8 +45,8 @@ Stop by closing the GUI. IceFieldCreator will write the final body assembly to o
 
 If you want to contribute, please consider working on one of the following topics:
 
-- AABB tree: Currently, all bodies are quaried in each iteration step. Efficiency can be improved
-by fattening the body AABBs and only quarying bodies that move out of their fattered AABB. 
+- AABB tree: Currently, all bodies are queried in each iteration step. Efficiency can be improved
+by fattening the body AABBs and only querying bodies that move out of their fattened AABB. 
 
 - Contact algorithm: Replace the current contact algorithm by a SAT or other algorithm that is 
 independent from boost::geometry. 

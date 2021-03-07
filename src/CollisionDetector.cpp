@@ -101,8 +101,8 @@ std::set<IndexPair> CollisionDetector::findPotentialContacts()
 
     std::set<IndexPair> colPairs; //Using an ordered set ensures determinism.
 
-    //Quarying the AABB tree is by far the most time consuming part of the current code.
-    //TODO: improve efficiency by fattening the AABBs and only quarying the three if a body moves
+    //Querying the AABB tree is by far the most time consuming part of the current code.
+    //TODO: improve efficiency by fattening the AABBs and only querying the three if a body moves
     //Out of its fattened AABB, similar to Box2D.
 
     //find body pairs:
