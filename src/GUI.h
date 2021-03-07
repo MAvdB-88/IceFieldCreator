@@ -26,7 +26,7 @@
 #include <memory>
 
 #include "Vector2.h"
-#include "UserInput.h" //userInput is returned from the GUI to the main simulation
+#include "UserInput.h" //User input is returned from the GUI to the main simulation.
 
 class BodyVec;
 class Contact;
@@ -45,7 +45,7 @@ public:
     ~GUI(); //Needed because of forward declaration of cv::Mat
 
     UserInput draw(const BodyVec& bodies, const std::vector<Contact>& contacts, double maxPenetration, bool penBelowLimit);
-    bool init(Vector2 domainSize);
+    bool      init(Vector2 domainSize);
 
     //Used in mouseCallBack
     struct CVMouseInfo
