@@ -31,7 +31,7 @@
 
 struct Node
 {
-    AABB aabb; 	   /// The fattened axis-aligned bounding box.
+    AABB aabb; 	   /// The axis-aligned bounding box.
     int parent;    /// Index of the parent node.
     int next; 	   /// Index of the next node.
     int left;      /// Index of the left-hand child.
@@ -49,9 +49,9 @@ public:
 
     DynamicAabbTree(int nParticles = 16);
 
-    bool insertParticle(int id, Vector2 lowerBound, Vector2 upperBound);
+    bool insertParticle(int id, const AABB& aabb);
     bool removeParticle(int id);
-    bool updateParticle(int id, Vector2 lowerBound, Vector2 upperBound);
+    bool updateParticle(int id, const AABB& aabb);
 
     std::vector<int> query(int id) const;
     std::vector<int> query(const AABB& aabb) const;
@@ -59,13 +59,9 @@ public:
     const AABB& getAABB(int id);
 
     int getNumParticles() const {return m_particleMap.size(); }
+    int nodeCount() const { return m_nodeCount; }
+
     int getHeight() const;
-    int getNodeCount() const;
-
-    int computeMaximumBalance() const;
-    double computeSurfaceAreaRatio() const;
-
-    void rebuild(); 		/// Rebuild an optimal DynamicAabbTree.
 
 private:
 
@@ -76,8 +72,6 @@ private:
     void  insertLeaf(int);
     void  removeLeaf(int);
     int   balance(int);
-    int   computeHeight() const;
-    int   computeHeight(int) const;
 
     std::vector<Node> m_nodes; // The dynamic tree.
 

@@ -46,11 +46,6 @@ double AABB::computePerimiter() const
     return 2.0 * (wx + wy);
 }
 
-double AABB::perimiter() const
-{
-    return m_perimiter;
-}
-
 void AABB::merge(const AABB& aabb1, const AABB& aabb2)
 {
 

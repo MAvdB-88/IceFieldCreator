@@ -43,7 +43,7 @@ CollisionDetector::CollisionDetector(std::shared_ptr<BodyVec> bodyVec):
         AABB aabb = body.globalAABBWithMargin();
 
         //Margins should be added by the body. No margins added in tree!
-        m_dynamicAABBTree.insertParticle(i, aabb.m_lowerBound, aabb.m_upperBound);
+        m_dynamicAABBTree.insertParticle(i, aabb);
     }
 }
 
@@ -95,7 +95,7 @@ std::set<IndexPair> CollisionDetector::findPotentialContacts()
         AABB aabb = body.globalAABBWithMargin();
 
         //Margins should be added by the body. No margins added in tree!
-        m_dynamicAABBTree.updateParticle(i, aabb.m_lowerBound, aabb.m_upperBound);
+        m_dynamicAABBTree.updateParticle(i, aabb);
     }
 
 

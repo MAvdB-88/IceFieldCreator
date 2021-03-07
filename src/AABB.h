@@ -33,12 +33,17 @@ public:
     AABB();
     AABB(Vector2 lowerBound, Vector2 upperBound);
 
-    double computePerimiter() const;
-    double perimiter() const;
-    void   merge(const AABB& aabb0, const AABB& aabb1);
+    double perimiter() const { return m_perimiter; }
+    Vector2 lowerBound() const { return m_lowerBound; }
+    Vector2 upperBound() const { return m_upperBound; }
 
+    void   merge(const AABB& aabb0, const AABB& aabb1);
     bool contains(const AABB& aabb) const;
     bool overlaps(const AABB& aabb) const;
+
+private:
+
+    double computePerimiter() const;
 
     Vector2 m_lowerBound;
     Vector2 m_upperBound;

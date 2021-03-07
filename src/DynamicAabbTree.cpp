@@ -23,6 +23,7 @@
 // SOFTWARE.
 
 #include "DynamicAabbTree.h"
+#include "ErrorLogger.h"
 
 #include <algorithm>
 #include <cassert>
@@ -32,8 +33,8 @@
 
 namespace
 {
-/// Null node flag.
-    const int g_nullNode = 0xffffffff;
+  // Null node flag.
+  const int g_nullNode = 0xffffffff;
 }
 
 bool Node::isLeaf() const
@@ -111,34 +112,19 @@ void DynamicAabbTree::freeNode(int node)
 
 
 
-bool DynamicAabbTree::insertParticle(int particle, Vector2 lowerBound, Vector2 upperBound)
+bool DynamicAabbTree::insertParticle(int particle, const AABB& aabb)
 {
     // Make sure the particle doesn't already exist.
     if (m_particleMap.count(particle) != 0)
     {
-        std::cerr << "[ERROR]: Particle already exists in DynamicAabbTree!" << std::endl;
+        ErrLog::log("Error: Particle already exists in DynamicAabbTree!");
         return false;
     }
 
     // Allocate a new node for the particle.
     int node = allocateNode();
 
-    for (int i = 0; i < 2; i++)
-    {
-        // Validate the bound.
-        if (lowerBound[i] >= upperBound[i])
-        {
-            std::cerr << "[ERROR]: AABB lower bound is greater than the upper bound!" << std::endl;
-            return false;
-        }
-    }
-
-    m_nodes[node].aabb.m_lowerBound = lowerBound;
-    m_nodes[node].aabb.m_upperBound = upperBound;
-
-    m_nodes[node].aabb.m_perimiter = m_nodes[node].aabb.computePerimiter();
-    //m_nodes[node].aabb.m_centre = m_nodes[node].aabb.computeCentre();
-
+    m_nodes[node].aabb = aabb;
     m_nodes[node].height = 0;     // Zero the height.
 
     insertLeaf(node);     // Insert a new leaf into the tree.
@@ -157,7 +143,7 @@ bool DynamicAabbTree::removeParticle(int particle)
     auto it = m_particleMap.find(particle);
     if (it == m_particleMap.end())
     {
-        std::cerr << "[ERROR]: Invalid particle index!" << std::endl;
+        ErrLog::log("ERROR: Cannot remove particle, invalid particle index!");
         return false;
     }
 
@@ -171,7 +157,7 @@ bool DynamicAabbTree::removeParticle(int particle)
 }
 
 
-bool DynamicAabbTree::updateParticle(int particle, Vector2 lowerBound, Vector2 upperBound)
+bool DynamicAabbTree::updateParticle(int particle, const AABB& aabb)
 {
     // Find the particle.
     auto it = m_particleMap.find(particle);
@@ -179,38 +165,18 @@ bool DynamicAabbTree::updateParticle(int particle, Vector2 lowerBound, Vector2 u
     // The particle doesn't exist.
     if (it == m_particleMap.end())
     {
-        std::cerr << "[ERROR]: Invalid particle index!" << std::endl;
+        ErrLog::log("ERROR: Invalid particle index!");
         return false;
     }
 
     // Extract the node index.
     int node = it->second;
 
-    // Compute the AABB limits.
-    for (int i = 0; i < 2; i++)
-    {
-        // Validate the bound.
-        if (lowerBound[i] >= upperBound[i])
-        {
-            std::cerr << "[ERROR]: AABB lower bound is greater than the upper bound!" << std::endl;
-            return false;
-        }
-    }
-
-    // Create the new AABB.
-    AABB aabb(lowerBound, upperBound);
-
-    // No need to update if the particle is still within its fattened AABB.
-    if (m_nodes[node].aabb.contains(aabb)) return false;
-
     // Remove the current leaf.
     removeLeaf(node);
 
     // Assign the new AABB.
     m_nodes[node].aabb = aabb;
-
-    // Update the surface area.
-    m_nodes[node].aabb.m_perimiter = m_nodes[node].aabb.computePerimiter();
 
     // Insert a new leaf node.
     insertLeaf(node);
@@ -223,7 +189,7 @@ std::vector<int> DynamicAabbTree::query(int particle) const
     // Make sure that this is a valid particle.
     if (m_particleMap.count(particle) == 0)
     {
-        std::cerr << "[ERROR]: Invalid particle index!" << std::endl;
+        ErrLog::log("ERROR: Invalid particle index!");
         exit(EXIT_FAILURE);
     }
 
@@ -566,125 +532,9 @@ int DynamicAabbTree::balance(int node)
     return node;
 }
 
-int DynamicAabbTree::computeHeight() const
-{
-    return computeHeight(m_root);
-}
-
-int DynamicAabbTree::computeHeight(int node) const
-{
-    if (m_nodes[node].isLeaf()) return 0;
-
-    int height1 = computeHeight(m_nodes[node].left);
-    int height2 = computeHeight(m_nodes[node].right);
-
-    return 1 + std::max(height1, height2);
-}
 
 int DynamicAabbTree::getHeight() const
 {
     if (m_root ==  g_nullNode) return 0;
     return m_nodes[m_root].height;
-}
-
-int DynamicAabbTree::getNodeCount() const
-{
-    return m_nodeCount;
-}
-
-int DynamicAabbTree::computeMaximumBalance() const
-{
-    int maxBalance = 0;
-    for (int i = 0; i < m_nodeCapacity; i++)
-    {
-        if (m_nodes[i].height <= 1)             continue;
-
-        int balance = std::abs(m_nodes[m_nodes[i].left].height - m_nodes[m_nodes[i].right].height);
-        maxBalance = std::max(maxBalance, balance);
-    }
-
-    return maxBalance;
-}
-
-double DynamicAabbTree::computeSurfaceAreaRatio() const
-{
-    if (m_root ==  g_nullNode) return 0.0;
-
-    double rootArea = m_nodes[m_root].aabb.computePerimiter();
-    double totalArea = 0.0;
-
-    for (int i = 0; i < m_nodeCapacity; i++)
-    {
-        if (m_nodes[i].height < 0) continue;
-
-        totalArea += m_nodes[i].aabb.computePerimiter();
-    }
-
-    return totalArea / rootArea;
-}
-
-void DynamicAabbTree::rebuild()
-{
-    std::vector<int> nodeIndices;
-    nodeIndices.resize(m_nodeCount);
-    int count = 0;
-
-    for (int i = 0; i < m_nodeCapacity; i++)
-    {
-        // Free node.
-        if (m_nodes[i].height < 0) continue;
-
-        if (m_nodes[i].isLeaf())
-        {
-            m_nodes[i].parent =  g_nullNode;
-            nodeIndices[count] = i;
-            count++;
-        }
-        else freeNode(i);
-    }
-
-    while (count > 1)
-    {
-        double minCost = std::numeric_limits<double>::max();
-        int iMin = -1, jMin = -1;
-
-        for (int i = 0; i < count; i++)
-        {
-            AABB aabbi = m_nodes[nodeIndices[i]].aabb;
-
-            for (int j = i + 1; j < count; j++)
-            {
-                AABB aabbj = m_nodes[nodeIndices[j]].aabb;
-                AABB aabb;
-                aabb.merge(aabbi, aabbj);
-                double cost = aabb.perimiter();
-
-                if (cost < minCost)
-                {
-                    iMin = i;
-                    jMin = j;
-                    minCost = cost;
-                }
-            }
-        }
-
-        int index1 = nodeIndices[iMin];
-        int index2 = nodeIndices[jMin];
-
-        int parent = allocateNode();
-        m_nodes[parent].left = index1;
-        m_nodes[parent].right = index2;
-        m_nodes[parent].height = 1 + std::max(m_nodes[index1].height, m_nodes[index2].height);
-        m_nodes[parent].aabb.merge(m_nodes[index1].aabb, m_nodes[index2].aabb);
-        m_nodes[parent].parent =  g_nullNode;
-
-        m_nodes[index1].parent = parent;
-        m_nodes[index2].parent = parent;
-
-        nodeIndices[jMin] = nodeIndices[count - size_t(1)];
-        nodeIndices[iMin] = parent;
-        count--;
-    }
-
-    m_root = nodeIndices[0];
 }
