@@ -56,7 +56,7 @@ public:
     std::vector<int> query(int id) const;
     std::vector<int> query(const AABB& aabb) const;
 
-    const AABB& getAABB(int id);
+    bool getAABB(int particle, AABB* aabb) const;
 
     int getNumParticles() const {return m_particleMap.size(); }
     int nodeCount() const { return m_nodeCount; }

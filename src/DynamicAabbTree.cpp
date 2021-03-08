@@ -45,7 +45,6 @@ bool Node::isLeaf() const
 DynamicAabbTree::DynamicAabbTree(int nParticles):
     m_boxSize(0.0, 0.0)
 {
-
     // Initialise the tree.
     m_root =  g_nullNode;
     m_nodeCount = 0;
@@ -165,7 +164,7 @@ bool DynamicAabbTree::updateParticle(int particle, const AABB& aabb)
     // The particle doesn't exist.
     if (it == m_particleMap.end())
     {
-        ErrLog::log("ERROR: Invalid particle index!");
+        ErrLog::log("ERROR: DynamicAABBTree invalid particle index on update!" + std::to_string(particle));
         return false;
     }
 
@@ -184,18 +183,19 @@ bool DynamicAabbTree::updateParticle(int particle, const AABB& aabb)
     return true;
 }
 
+
 std::vector<int> DynamicAabbTree::query(int particle) const
 {
-    // Make sure that this is a valid particle.
-    if (m_particleMap.count(particle) == 0)
+    auto mapIt = m_particleMap.find(particle);
+    if (mapIt == m_particleMap.end())
     {
-        ErrLog::log("ERROR: Invalid particle index!");
-        exit(EXIT_FAILURE);
+        ErrLog::log("ERROR: DynamicAABBTree invalid particle index on querty! Index:" + std::to_string(particle));
+        return std::vector<int>(); //return empty vector
     }
 
-    // Test overlap of particle AABB against all other particles.
-    return query(particle, m_nodes[m_particleMap.find(particle)->second].aabb);
+    return query(particle, m_nodes[mapIt->second].aabb);
 }
+
 
 std::vector<int> DynamicAabbTree::query(int particle, const AABB& aabb) const
 {
@@ -236,6 +236,7 @@ std::vector<int> DynamicAabbTree::query(int particle, const AABB& aabb) const
     return particles;
 }
 
+
 std::vector<int> DynamicAabbTree::query(const AABB& aabb) const
 {
     // Make sure the tree isn't empty.
@@ -248,10 +249,20 @@ std::vector<int> DynamicAabbTree::query(const AABB& aabb) const
     return query(std::numeric_limits<int>::max(), aabb);
 }
 
-const AABB& DynamicAabbTree::getAABB(int particle)
+
+bool DynamicAabbTree::getAABB(int particle, AABB* aabb) const
 {
-    return m_nodes[m_particleMap[particle]].aabb;
+    auto mapIt = m_particleMap.find(particle);
+    if (mapIt == m_particleMap.end())
+    {
+        ErrLog::log("ERROR: DynamicAABBTree invalid particle index on getAABB! Index:" + std::to_string(particle));
+        return false; //return empty vector
+    }
+
+    *aabb = m_nodes[mapIt->second].aabb;
+    return true;
 }
+
 
 void DynamicAabbTree::insertLeaf(int leaf)
 {
@@ -373,6 +384,7 @@ void DynamicAabbTree::insertLeaf(int leaf)
     }
 }
 
+
 void DynamicAabbTree::removeLeaf(int leaf)
 {
     if (leaf == m_root)
@@ -419,6 +431,7 @@ void DynamicAabbTree::removeLeaf(int leaf)
         freeNode(parent);
     }
 }
+
 
 int DynamicAabbTree::balance(int node)
 {
