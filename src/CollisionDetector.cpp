@@ -34,8 +34,6 @@ CollisionDetector::CollisionDetector(std::shared_ptr<BodyVec> bodyVec):
 {
     //The collisionDetector uses the body's position in the bodies vector as index value.
     //This works fine as long as no bodies are removed. 
-    //Even body removal would not be a major issue with the current implementation, 
-    //but handling contact persistance would require a more advanced method.
 
     for (int i = 0; i < m_bodyVec->size(); i++)
     {
@@ -98,12 +96,7 @@ std::set<IndexPair> CollisionDetector::findPotentialContacts()
         m_dynamicAABBTree.updateParticle(i, aabb);
     }
 
-
     std::set<IndexPair> colPairs; //Using an ordered set ensures determinism.
-
-    //Querying the AABB tree is by far the most time consuming part of the current code.
-    //TODO: improve efficiency by fattening the AABBs and only querying the three if a body moves
-    //Out of its fattened AABB, similar to Box2D.
 
     //find body pairs:
     for (int i = 0; i < m_bodyVec->size(); i++)

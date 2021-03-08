@@ -52,13 +52,6 @@ typedef boost::geometry::model::linestring<Vector2> bgLinestring;
 namespace trans = boost::geometry::strategy::transform;
 using boost::geometry::dsv;
 
-//Shape::Shape(const Shape& other) :
-//	m_defaultNormalDirection(other.m_defaultNormalDirection),
-//	m_collisionMargin(other.m_collisionMargin)
-//{
-//	m_ring = std::make_unique<bgRing>(*other.m_ring);
-//}
-
 Shape::Shape(Shape&& other) = default;
 
 
@@ -235,8 +228,6 @@ double maxPenetration(const bgRing& poly, Vector2 normal)
 {
 	double minDist(HUGE_VAL), maxDist(-HUGE_VAL);
 
-
-
 	//Find the maximum penetration:
 	for (int i = 0; i < poly.size(); i++)
 	{
@@ -301,7 +292,9 @@ bool Shape::overlap(const Shape& otherShape, const Transform& trans, std::vector
 {
 	//Return bolean is for error checking, not for indicating if there is contact!
 	//Efficiency and logic flow of the function can be improved. How would the efficiency compare to SAT or GJK algorithms?
-	//Sat is simple to implement and may amke the code indepdent from boost. Function efficiency currently not critical to performance.
+	//Sat is simple to implement and may make the code indepdent from boost.
+
+	//Function is currently critical to performance. Focus optimization efforts here!
 
 	TempLocalShape locOtherShape(otherShape, trans);
 	TempLocalShape locThisShape(*this);

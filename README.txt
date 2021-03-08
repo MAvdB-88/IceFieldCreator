@@ -45,11 +45,9 @@ Stop by closing the GUI. IceFieldCreator will write the final body assembly to o
 
 If you want to contribute, please consider working on one of the following topics:
 
-- AABB tree: Currently, all bodies are queried in each iteration step. Efficiency can be improved
-by fattening the body AABBs and only querying bodies that move out of their fattened AABB. 
-
 - Contact algorithm: Replace the current contact algorithm by a SAT or other algorithm that is 
-independent from boost::geometry. 
+independent from boost::geometry. The contact algorithm is currently performance critical. 
+Efficiency improvement efforts should focus on the shape::overlap function (and its sub-functions).
 
 - Dynamics: IceFieldCreator is currently only used for resolving overlaps, but can be expanded quite
 easily to a simple physics engine by including dynamics.
