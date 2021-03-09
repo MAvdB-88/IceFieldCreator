@@ -20,18 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <vector>
+
 #include "InputData.h"
 #include "Reader.h"
 #include "Writer.h"
 #include "CommandLineReader.h"
 #include "IceFieldCreator.h"
 #include "ErrorLogger.h"
-
-
-#include <vector>
-
-#include <Windows.h>
-
 
 int main(int argc, char* argv[])
 {
