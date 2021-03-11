@@ -397,8 +397,8 @@ bool Shape::overlap(const Shape& otherShape, const Transform& trans, std::vector
 		contact.setContactPoint(lineCrossingsMargin[1]);
 		contact.setNormal(normal);
 
-		double dist0 = distance(locThisShape.ringNoMargin, lineCrossingsMargin[0]);
-		double dist1 = distance(locOtherShape.ringNoMargin, lineCrossingsMargin[0]);
+		double dist0 = distance(locThisShape.ringNoMargin, lineCrossingsMargin[1]);
+		double dist1 = distance(locOtherShape.ringNoMargin, lineCrossingsMargin[1]);
 		double distTot = dist0 + dist1;
 
 		contact.setPenetration(-distTot);
