@@ -149,9 +149,17 @@ bool Reader::readInputData(std::string fileName, InputData* inputData)
 
 bool Reader::readSettings(Settings* settings)
 {
-    if (!m_doc->m_document.HasMember("settings")) return false;
+    if (!m_doc->m_document.HasMember("settings"))
+    {
+        ErrLog::log("Reading error: Could not find settings.");
+        return false;
+    }
 
-    if (!m_doc->m_document["settings"].IsObject()) return false;
+    if (!m_doc->m_document["settings"].IsObject())
+    {
+        ErrLog::log("Reading error: Expected settings object.");
+        return false;
+    }
 
     const rapidjson::Value& settingsObj = m_doc->m_document["settings"];
 
@@ -185,10 +193,9 @@ bool Reader::parseFile(std::string fileName)
     if (m_doc->m_document.HasParseError())
     {
         ErrLog::log("Error: Failed to parse input file. " + fileName);
+        fclose(file);
         return false;
     }
-
-    fclose(file);
 
     return true;
 }
@@ -210,7 +217,10 @@ bool Reader::readBodyPoints(std::vector<std::vector<Vector2>>* bodyPointsVec)
             {
                 if (bodyArray[i].IsObject())
                 {
-                    bool test = bodyArray[i].HasMember("points");
+                    if (!bodyArray[i].HasMember("points"))
+                    {
+                        ErrLog::log("Reading error: No points in body.");
+                    }
 
                     const rapidjson::Value& pointsArray = bodyArray[i]["points"];
 

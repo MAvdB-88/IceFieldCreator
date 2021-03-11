@@ -36,6 +36,8 @@ public:
     //Class wrapper prevents body removal. 
     //Note that the class only encapsulates the vector, and 
     //allows modification of bodies outsize of the class.
+    //This is not totally fail-safe; bodies can still be invalidated 
+    //by calling std::move on a non-const reference.
 
     BodyVec(int nBodies = 0);
     ~BodyVec();
