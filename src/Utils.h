@@ -36,4 +36,6 @@ IndexPair makePair(int i, int j);
 //Checks convexity, indepedent from orientation.
 bool isConvexPolygon(const std::vector<Vector2>& poly);
 
+Vector2 mean(const std::vector<Vector2>& poly);
+
 };

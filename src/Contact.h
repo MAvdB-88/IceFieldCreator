@@ -23,13 +23,26 @@
 #pragma once
 
 #include "Vector2.h"
-
-class Transform;
+#include "Transform.h"
 
 class Contact
 {
 public:
-    Contact();
+    Contact::Contact() :
+        m_bodyIdx0(-1),
+        m_bodyIdx1(-1),
+        m_contactPoint(0.0, 0.0),
+        m_normal(0.0, 0.0),
+        m_penetration(0.0)
+    {};
+
+    Contact(const Vector2& normal, const Vector2& contactPoint, double penetration):
+        m_bodyIdx0(-1),
+        m_bodyIdx1(-1),
+        m_normal(normal),
+        m_contactPoint(contactPoint),
+        m_penetration(penetration)
+    {};
 
     Vector2 contactPoint() const { return m_contactPoint; }
     Vector2 normal()       const { return m_normal; }
@@ -43,7 +56,11 @@ public:
     void setNormal(Vector2 normal)             { m_normal = normal; }
     void setPenetration(double penetration)    { m_penetration = penetration; }
 
-    void transform(const Transform& trans);
+    void Contact::transform(const Transform& trans)
+    {
+        m_normal = rotateVec(trans.orientation(), m_normal);
+        m_contactPoint = transformVec(trans, m_contactPoint);
+    }
 
 private:
 

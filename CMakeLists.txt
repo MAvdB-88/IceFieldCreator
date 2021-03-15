@@ -8,7 +8,6 @@ find_package(OpenCV)
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 include_directories(C:/rapidjson-master/include)
-include_directories(C:/boost_1_67_0)
 
 add_executable(IceFieldCreator 
 src/IceFieldCreator.cpp
@@ -21,7 +20,6 @@ src/Orientation.h
 src/Transform.h
 src/Utils.h
 src/Utils.cpp
-src/Contact.cpp
 src/Contact.h
 src/InputData.h
 src/Main.cpp
@@ -37,8 +35,6 @@ src/CommandLineReader.h
 src/ErrorLogger.cpp
 src/ErrorLogger.h
 src/SolverConstraint.h
-src/Contact.cpp
-src/Contact.h
 src/Reader.cpp
 src/Reader.h
 src/Writer.cpp

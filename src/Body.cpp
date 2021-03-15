@@ -22,6 +22,7 @@
 
 #include "Body.h"
 #include "Contact.h"
+#include "Shape.h"
 
 #include "ErrorLogger.h"
 
@@ -33,7 +34,7 @@ Body::Body() :
     m_held(false)
 {}
 
-Body::Body(Transform trans, Shape& shape, double density):
+Body::Body(Transform trans, std::unique_ptr<Shape> shape, double density):
     m_transform(trans),
     m_linearVelocityChangeImpulse(0.0,0.0),
     m_angularVelocityChangeImpulse(0.0),
@@ -46,12 +47,16 @@ Body::Body(Transform trans, Shape& shape, double density):
     //Resolving overlaps would also work for other mass and interia properties, but generally the convergence is slower.
 
     //TODO: Check if these can fail or will always work.
-    double mass = m_shape.calcArea()*density;
+    double mass = m_shape->calcArea()*density;
     if (mass > DBL_EPSILON) m_invMass = 1.0 / mass;
 
-    double inertia = m_shape.calcInertia()*density;
+    double inertia = m_shape->calcInertia()*density;
     if (mass > DBL_EPSILON) m_invInertia = 1.0 / inertia;
 }
+
+
+Body::~Body() = default;
+Body::Body(Body&& other) = default;
 
 
 bool Body::isStatic() const
@@ -64,24 +69,24 @@ bool Body::isStatic() const
 
 AABB Body::globalAABBWithMargin() const
 {
-    return m_shape.calcTransformedAABBWithMargin(m_transform);
+    return m_shape->calcTransformedAABBWithMargin(m_transform);
 }
 
 std::vector<Vector2> Body::globalPoints() const
 {
-    return m_shape.transformedPoints(m_transform);
+    return m_shape->transformedPoints(m_transform);
 }
 
 const std::vector<Vector2>& Body::localPoints() const
 {
-    return m_shape.localPoints();
+    return m_shape->localPoints();
 }
 
 
 bool Body::overlaps(Vector2 point) const
 {
     Vector2 locPoint = transformVecInv(m_transform, point);
-    return m_shape.overlaps(locPoint);
+    return m_shape->overlaps(locPoint);
 }
 
 
@@ -126,7 +131,7 @@ void Body::setPosition(Vector2 position)
 
 void Body::setMargin(double margin)
 {
-    m_shape.setCollisionMargin(margin);
+    m_shape->setCollisionMargin(margin);
 }
 
 
@@ -136,7 +141,7 @@ std::vector<Contact> Body::contactProperties(const Body& otherBody) const
     //Contact properties are calculated in the coordinates of this body, 
     //such that only the shape of the other body needs to be transformed.
     const Transform& otherTrans = otherBody.m_transform;
-    const Shape& otherShape = otherBody.m_shape;
+    const Shape& otherShape = *otherBody.m_shape;
 
     //the combined transform transforms the shape of the other body from the other body's coordinate system
     //to this bodies coordinate system.
@@ -145,7 +150,7 @@ std::vector<Contact> Body::contactProperties(const Body& otherBody) const
     //Overlap properties determination can fail in specific cases, 
     //but these isolated will be corrected in subsequent steps. No need for warnings/errors.
     std::vector<Contact> contacts;
-    m_shape.overlap(otherShape, combinedTransform, &contacts);
+    m_shape->overlap(otherShape, combinedTransform, &contacts);
 
     //Transform the contact to world coorinates.
     for (int i = 0; i < contacts.size(); i++)

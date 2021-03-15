@@ -23,6 +23,8 @@
 #include "Utils.h"
 #include "Vector2.h"
 
+#include <numeric>
+
 namespace utils
 {
 IndexPair makePair(int i, int j)
@@ -38,6 +40,12 @@ IndexPair makePair(int i, int j)
 };
 
 
+Vector2 mean(const std::vector<Vector2>& poly)
+{
+	Vector2 sum = std::accumulate(poly.begin(), poly.end(), Vector2(0.0, 0.0));
+	return sum / double(poly.size());
+}
+
 bool isConvexPolygon(const std::vector<Vector2>& poly)
 {
 	if (poly.size() < 3)
@@ -50,7 +58,7 @@ bool isConvexPolygon(const std::vector<Vector2>& poly)
 	Vector2 pBegin = poly[0];
 	Vector2 pEnd = poly[poly.size() - 1];
 
-	if ((pEnd - pBegin).length2() > 0.00001) //Polygon not closed
+	if ((pEnd - pBegin).length2() > DBL_EPSILON) //Polygon not closed
 	{
 		Vector2 p0 = poly[poly.size() - 1];
 		Vector2 p1 = poly[0];

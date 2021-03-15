@@ -34,6 +34,7 @@
 #include "CollisionDetector.h"
 #include "Solver.h"
 #include "Body.h"
+#include "Shape.h"
 #include "UserInput.h"
 #include "GUI.h"
 
@@ -96,10 +97,10 @@ bool IceFieldCreator::initBoundary(Vector2 domainSize)
         wallPointsY[3] = Vector2(-halfSizeX, halfWallThickness);
 
         {
-            Shape wallShapeY;
-            wallShapeY.init(wallPointsY); //Never fails in current usage (initializing rectangular shape) so no need to check the return bolean.
-            wallShapeY.setDefaultNormalDirection(Vector2(0.0, 1.0));
-            wallShapeY.setCollisionMargin(m_settings.maxCollisionMargin);
+            std::unique_ptr<Shape> wallShapeY = std::make_unique<Shape>();
+            wallShapeY->init(wallPointsY); //Never fails in current usage (initializing rectangular shape) so no need to check the return bolean.
+            wallShapeY->setDefaultNormalDirection(Vector2(0.0, 1.0));
+            wallShapeY->setCollisionMargin(m_settings.maxCollisionMargin);
 
             Vector2 position(0.0, -halfSizeY - halfWallThickness);
             Transform trans(position, 0.0);
@@ -109,9 +110,10 @@ bool IceFieldCreator::initBoundary(Vector2 domainSize)
         }
 
         {
-            Shape wallShapeY;
-            wallShapeY.init(wallPointsY); //Never fails in current usage (initializing rectangular shape) so no need to check the return bolean.
-            wallShapeY.setDefaultNormalDirection(Vector2(0.0, -1.0));
+            std::unique_ptr<Shape> wallShapeY = std::make_unique<Shape>();
+            wallShapeY->init(wallPointsY); //Never fails in current usage (initializing rectangular shape) so no need to check the return bolean.
+            wallShapeY->setDefaultNormalDirection(Vector2(0.0, -1.0));
+            wallShapeY->setCollisionMargin(m_settings.maxCollisionMargin);
 
             Vector2 position(0.0, halfSizeY + halfWallThickness);
             Transform trans(position, 0.0);
@@ -128,10 +130,10 @@ bool IceFieldCreator::initBoundary(Vector2 domainSize)
         wallPointsX[3] = Vector2(-halfWallThickness, halfSizeY + wallThickness);
 
         {
-            Shape wallShapeX;
-            wallShapeX.init(wallPointsX);
-            wallShapeX.setDefaultNormalDirection(Vector2(1.0, 0.0));
-            wallShapeX.setCollisionMargin(m_settings.maxCollisionMargin);
+            std::unique_ptr<Shape> wallShapeX = std::make_unique<Shape>();
+            wallShapeX->init(wallPointsX);
+            wallShapeX->setDefaultNormalDirection(Vector2(1.0, 0.0));
+            wallShapeX->setCollisionMargin(m_settings.maxCollisionMargin);
 
             Vector2 position(-halfSizeX - halfWallThickness, 0.0);
             Transform trans(position, 0.0);
@@ -141,10 +143,10 @@ bool IceFieldCreator::initBoundary(Vector2 domainSize)
         }
 
         {
-            Shape wallShapeX;
-            wallShapeX.init(wallPointsX);
-            wallShapeX.setDefaultNormalDirection(Vector2(-1.0, 0.0));
-            wallShapeX.setCollisionMargin(m_settings.maxCollisionMargin);
+            std::unique_ptr<Shape> wallShapeX = std::make_unique<Shape>();
+            wallShapeX->init(wallPointsX);
+            wallShapeX->setDefaultNormalDirection(Vector2(-1.0, 0.0));
+            wallShapeX->setCollisionMargin(m_settings.maxCollisionMargin);
 
             Vector2 position(halfSizeX + halfWallThickness, 0.0);
             Transform trans(position, 0.0);
@@ -182,13 +184,13 @@ bool IceFieldCreator::initBodies(const InputData& inputData)
         int randomShapeIdx = int((double)nPolygons * (double)rand() / RAND_MAX - 0.01);
         const std::vector<Vector2>& polygon = bodyPointsVec[randomShapeIdx];
 
-        Shape shape;
-        if (!shape.init(polygon))
+        std::unique_ptr<Shape> shape = std::make_unique<Shape>();
+        if (!shape->init(polygon))
         {
             ErrLog::log("Error: Failed to create shape from polygon vector at index: " + std::to_string(randomShapeIdx));
             return false;
         }
-        shape.setCollisionMargin(collisionMargin);
+        shape->setCollisionMargin(collisionMargin);
 
         double orientation = (double)rand() / RAND_MAX * 2.0 * M_PI - M_PI;
         double xCor = min.x() + (double)rand() / RAND_MAX * size.x();
@@ -196,7 +198,7 @@ bool IceFieldCreator::initBodies(const InputData& inputData)
 
         Transform trans(Vector2(xCor, yCor), orientation);
 
-        addedArea += shape.calcArea();
+        addedArea += shape->calcArea();
 
         Body body(trans, std::move(shape));
         m_bodyVec->addBody(std::move(body));

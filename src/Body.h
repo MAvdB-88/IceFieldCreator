@@ -22,18 +22,27 @@
 
 #pragma once
 
-#include "Shape.h"
+#include <memory>
+#include <vector>
+
+
 #include "Vector2.h"
 #include "Transform.h"
+#include "AABB.h"
 
 class Contact;
+class Shape;
 
 class Body
 {
 public:
     Body();
-    Body(Transform trans, Shape& shape, double density = 1.0);
+    Body(Transform trans, std::unique_ptr<Shape> shape, double density = 1.0);
   
+    //Needed because of forward declared type in unique ptr.
+    ~Body();
+    Body(Body&& other);
+
     double               invMass()    const { return m_invMass; }
     double               invInertia() const { return m_invInertia; }
     const Transform&     transform()  const { return m_transform; }
@@ -73,9 +82,9 @@ private:
     Transform  m_transform;
     double     m_invMass;
     double     m_invInertia;
-    Shape      m_shape;
-
     bool       m_held;
+
+    std::unique_ptr<Shape>      m_shape;
 
     //Variables used in solver (see solver.cpp for general explanation):
     Vector2 m_linearVelocityChangeImpulse;
