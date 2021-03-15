@@ -79,7 +79,7 @@ GUI::GUI():
     m_centeringDistV(0),
     m_sliderPosMargin(1000),
     m_sliderMaxMargin(1000),
-    m_sliderPosDisp(200),
+    m_sliderPosDisp(500),
     m_sliderMaxDisp(1000)
 {}
 
