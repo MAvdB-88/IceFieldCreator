@@ -9,16 +9,15 @@ It can be used to create random numerical broken ice fields for the simulation o
 IceFieldCreator uses the following libraries:
 - RapidJSON v1.1.0 (rapidjson.org)
 - OpenCV v4.5.1 (opencv.org)
-- Boost v1.67 (boost.org)
 - STL
 
 
 # Building
 
 - Download and install/build OpenCV following the instructions.
-- Download and unpack Boost and RapidJSON libraries (header-only)
+- Download and unpack RapidJSON library (header-only)
 - Install CMake.
-- Update CMakeLists to point to the right include directories for OpenCV, Boost and RapidJSON.
+- Update CMakeLists to point to the right include directories for OpenCV and RapidJSON.
 - Run CMake.
 
 - Project is developed and tested using Visual Studio 2019, v16.8.2.
@@ -44,10 +43,6 @@ Stop by closing the GUI. IceFieldCreator will write the final body assembly to o
 # Contributing
 
 If you want to contribute, please consider working on one of the following topics:
-
-- Contact algorithm: Replace the current contact algorithm by a SAT or other algorithm that is 
-independent from boost::geometry. The contact algorithm is currently performance critical. 
-Efficiency improvement efforts should focus on the shape::overlap function (and its sub-functions).
 
 - Dynamics: IceFieldCreator is currently only used for resolving overlaps, but can be expanded quite
 easily to a simple physics engine by including dynamics.
