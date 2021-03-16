@@ -197,6 +197,7 @@ bool Reader::parseFile(std::string fileName)
         return false;
     }
 
+    fclose(file);
     return true;
 }
 
