@@ -386,8 +386,10 @@ std::vector<Line> Shape::transformedLines(const std::vector<Line>&lines, const T
     {
         const Line& line = lines[i];
 
-        //Transform plane dir to local:
+        //Transform line dir to local:
         transLines[i].dir = rotateVec(trans.orientation(), line.dir);
+
+        //Transform line dist to local:
         Vector2 lineP = transformVec(trans, line.dir * -line.dist);
         transLines[i].dist = -transLines[i].dir.dot(lineP);
     }
@@ -410,7 +412,7 @@ std::vector<Vector2> Shape::transformedPoints(const std::vector<Vector2>&points,
 }
 
 
-std::vector<Line> Shape::linesFromPolygon(const std::vector<Vector2>&poly)
+std::vector<Line> Shape::linesFromPolygon(const std::vector<Vector2>& poly)
 {
     //Function private to shape: poly size checking performed upon initialization.
 
@@ -470,6 +472,8 @@ std::vector<Vector2> Shape::crossingPoints(const std::vector<Vector2>&poly0, con
 
 bool Shape::sat(const ShapeGeometry& shape0, const ShapeGeometry& shape1, double totMargin, Vector2* axis, double* penetration, Vector2* pMaxPen)
 {
+    //Separating axis theorem-based implementation that checks for overlap or gap distance and find the axis of minimum overlap (or maximum gap)
+
     const std::vector<Line>& lines0 = shape0.lines;
     const std::vector<Line>& lines1 = shape1.lines;
 
@@ -540,7 +544,7 @@ std::vector<double> Shape::project(const Line& line, const std::vector<Vector2>&
     return projection;
 }
 
-//Finds the minimum overlapping distance.
+//Finds the minimum overlapping distance. Used in SAT
 double Shape::minDist(const std::vector<double>& projection0, const std::vector<double>& projection1, bool projectedOnLinesOfShape0, int* idxPMaxPen)
 {
     //Check overlap:
@@ -680,7 +684,7 @@ bool Shape::isInside(const std::vector<Line>& lines, Vector2 point)
 
         double dist = line.dir.dot(point) + line.dist;
 
-        if (dist > 0.0) //Positive distance means point ouside line.
+        if (dist > 0.0) //Positive distance means point outside line.
         {
             return false;
         }
@@ -722,7 +726,7 @@ bool Shape::isCoLinear(const std::vector<Line>& lines, const Line& line)
 }
 
 
-//Minimum distance from polygon to point. Always returns positive value, also if point is inside poly!
+//Minimum distance from polygon outer line to point. Always returns positive value, also if point is inside poly!
 double Shape::distance(const std::vector<Vector2>& poly, Vector2 point)
 {
     double minDist(HUGE_VAL);
