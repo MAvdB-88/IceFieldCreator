@@ -64,6 +64,8 @@ void Solver::initConstraints(const BodyVec& bodies, const std::vector<Contact>& 
 
     m_solverSettings.maxImpulseError = HUGE_VAL;
 
+    m_solverConstraints.reserve(contacts.size());
+
     for (int i = 0; i < contacts.size(); i++)
     {
         const Contact& contact = contacts[i];
