@@ -57,25 +57,16 @@ public:
 
     bool overlaps(Vector2 point) const; //Check if point is in body
 
-    void updatePosition(double maxDisplacement, double maxRotation);
+    void updatePosition(Vector2 displacement, double rotation);
 
     //Used to enable mouse dragging of body
     void setPosition(Vector2 position);
+
     void setMargin(double margin);
 
     //Used to enable mouse dragging of body
     void hold() { m_held = true; }
     void release() { m_held = false; }
-
-    //Functions used in overlap solver
-    void applyImpulse(const Vector2& linearComponent, double angularComponent, double impulseMagnitude)
-    {
-        m_linearVelocityChangeImpulse += linearComponent * impulseMagnitude;
-        m_angularVelocityChangeImpulse += angularComponent * impulseMagnitude;
-    }
-
-    const Vector2& linearVelocityChangeImpulse() { return m_linearVelocityChangeImpulse; }
-    const double&  angularVelocityChangeImpulse() { return m_angularVelocityChangeImpulse; }
 
 private:
 
@@ -84,9 +75,6 @@ private:
     double     m_invInertia;
     bool       m_held;
 
-    std::unique_ptr<Shape>      m_shape;
+    std::unique_ptr<Shape> m_shape;
 
-    //Variables used in solver (see solver.cpp for general explanation):
-    Vector2 m_linearVelocityChangeImpulse;
-    double  m_angularVelocityChangeImpulse;
 };

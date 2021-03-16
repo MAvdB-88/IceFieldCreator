@@ -29,6 +29,7 @@ src/Body.cpp
 src/Body.h
 src/Solver.cpp
 src/Solver.h
+src/SolverBody.h
 src/UserInput.h
 src/CommandLineReader.cpp
 src/CommandLineReader.h

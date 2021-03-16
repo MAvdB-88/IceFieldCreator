@@ -24,10 +24,10 @@
 
 #include <vector>
 
-class Contact;
-class BodyVec;
+class  Contact;
+class  BodyVec;
 struct SolverConstraint;
-
+class  SolverBody;
 
 struct SolverSettings 
 {
@@ -49,18 +49,21 @@ struct SolverSettings
 class Solver
 {
 public:
+    Solver(int nBodies);
     Solver();
-    Solver::~Solver();
+
+    ~Solver();
 
     void solveOverlaps(BodyVec* bodies, const std::vector<Contact>& contacts, const SolverSettings& solverSettings);
 
 private:
 
     void initConstraints(const BodyVec& bodies, const std::vector<Contact>& contacts);
-    void solve(BodyVec* bodies);
+    void solve();
     void transformBodies(BodyVec* bodies);
 
     std::vector<SolverConstraint> m_solverConstraints;
+    std::vector<SolverBody> m_solverBodies;
     SolverSettings m_solverSettings;
 
 };

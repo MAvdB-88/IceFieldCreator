@@ -20,9 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <cmath>
+
 #include "Solver.h"
 #include "Body.h"
 #include "SolverConstraint.h"
+#include "SolverBody.h"
 #include "BodyVec.h"
 #include "Contact.h"
 
@@ -41,25 +44,36 @@
 //Solvers in Bullet Physics and Box2d create local compact "solverBody" vectors.
 //Since the body vector is already quite compact this is not done in this solver.
 
+Solver::Solver(int nBodies)
+{
+    m_solverBodies.resize(nBodies, SolverBody());
+}
+
+
 Solver::Solver() {}
 
 
 Solver::~Solver() = default;
 
 
-void Solver::solveOverlaps(BodyVec* bodies, const std::vector<Contact>& contacts, const SolverSettings& solverSettings)
+void Solver::solveOverlaps(BodyVec * bodies, const std::vector<Contact>&contacts, const SolverSettings & solverSettings)
 {
+    m_solverBodies.resize(bodies->size());
+    for (auto& body : m_solverBodies)
+        body.setZero();
+
     m_solverSettings = solverSettings;
 
     initConstraints(*bodies, contacts);
-    solve(bodies);
+    solve();
     transformBodies(bodies);
 
     m_solverConstraints.resize(0);
+
 }
 
 
-void Solver::initConstraints(const BodyVec& bodies, const std::vector<Contact>& contacts)
+void Solver::initConstraints(const BodyVec & bodies, const std::vector<Contact>&contacts)
 {
 
     m_solverSettings.maxImpulseError = HUGE_VAL;
@@ -87,7 +101,7 @@ void Solver::initConstraints(const BodyVec& bodies, const std::vector<Contact>& 
 
         double invInertia0 = body0.invInertia();
         double invInertia1 = body1.invInertia();
-        
+
         double invMass0 = body0.invMass();
         double invMass1 = body1.invMass();
 
@@ -115,7 +129,7 @@ void Solver::initConstraints(const BodyVec& bodies, const std::vector<Contact>& 
         if (inverseEffectiveMass < DBL_EPSILON) continue; //static-static collision.
 
         solverConstraint.effectiveMass = 1.0 / inverseEffectiveMass;
-        solverConstraint.rhs = contact.penetration()*solverConstraint.effectiveMass;
+        solverConstraint.rhs = contact.penetration() * solverConstraint.effectiveMass;
         solverConstraint.impulse = 0.0;
 
         double impulseError = m_solverSettings.maxPenetrationError * solverConstraint.effectiveMass;
@@ -126,7 +140,7 @@ void Solver::initConstraints(const BodyVec& bodies, const std::vector<Contact>& 
 
 }
 
-void Solver::solve(BodyVec* bodies)
+void Solver::solve()
 {
     double error(HUGE_VAL);
     double maxError = m_solverSettings.maxImpulseError;
@@ -134,8 +148,6 @@ void Solver::solve(BodyVec* bodies)
     int maxIterations = m_solverSettings.maxIterations;
 
     int numConstraints = int(m_solverConstraints.size());
-
-    BodyVec& bodiesRef = *bodies;
 
     while (error > maxError && nIterations < maxIterations)
     {
@@ -145,15 +157,15 @@ void Solver::solve(BodyVec* bodies)
         for (int i = 0; i < numConstraints; i++)
         {
             SolverConstraint& constraint = m_solverConstraints[i];
-            Body& body0 = bodiesRef[constraint.bodyIdx0];
-            Body& body1 = bodiesRef[constraint.bodyIdx1];
+            SolverBody& body0 = m_solverBodies[constraint.bodyIdx0];
+            SolverBody& body1 = m_solverBodies[constraint.bodyIdx1];
 
             double deltaImpulse = constraint.rhs;
 
-            const double deltaVel0Dotn = constraint.normal0.dot(body0.linearVelocityChangeImpulse()) 
-                + constraint.relPos0CrossNormal*body0.angularVelocityChangeImpulse();
-            const double deltaVel1Dotn = constraint.normal1.dot(body1.linearVelocityChangeImpulse()) 
-                + constraint.relPos1CrossNormal*body1.angularVelocityChangeImpulse();
+            const double deltaVel0Dotn = constraint.normal0.dot(body0.linearVelocityChangeImpulse())
+                + constraint.relPos0CrossNormal * body0.angularVelocityChangeImpulse();
+            const double deltaVel1Dotn = constraint.normal1.dot(body1.linearVelocityChangeImpulse())
+                + constraint.relPos1CrossNormal * body1.angularVelocityChangeImpulse();
 
             deltaImpulse -= deltaVel0Dotn * constraint.effectiveMass;
             deltaImpulse -= deltaVel1Dotn * constraint.effectiveMass;
@@ -179,14 +191,28 @@ void Solver::solve(BodyVec* bodies)
 }
 
 
-void Solver::transformBodies(BodyVec* bodies)
+void Solver::transformBodies(BodyVec * bodies)
 {
     BodyVec& bodiesRef = *bodies;
 
     for (int i = 0; i < bodiesRef.size(); i++)
     {
+        Vector2 disp = m_solverBodies[i].linearVelocityChangeImpulse();
+        double rot = m_solverBodies[i].angularVelocityChangeImpulse();
+
+        double maxDisplacement = m_solverSettings.maxDisplacement;
+        double maxRotation = m_solverSettings.maxRotation;
+
+        if (std::abs(disp.x()) > maxDisplacement)
+            disp.setX(std::copysign(1.0, disp.x()) * maxDisplacement);
+        if (std::abs(disp.y()) > maxDisplacement)
+            disp.setY(std::copysign(1.0, disp.y()) * maxDisplacement);
+
+        if (std::abs(rot) > maxRotation)
+            rot = std::copysign(1.0, rot) * maxRotation;
+
         Body& body = bodiesRef[i];
-        body.updatePosition(m_solverSettings.maxDisplacement, m_solverSettings.maxRotation);
+        body.updatePosition(disp, rot);
     }
 
 }

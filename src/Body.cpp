@@ -29,15 +29,11 @@
 Body::Body() :
     m_invMass(0.0),
     m_invInertia(0.0),
-    m_linearVelocityChangeImpulse(0.0, 0.0),
-    m_angularVelocityChangeImpulse(0.0),
     m_held(false)
 {}
 
 Body::Body(Transform trans, std::unique_ptr<Shape> shape, double density):
     m_transform(trans),
-    m_linearVelocityChangeImpulse(0.0,0.0),
-    m_angularVelocityChangeImpulse(0.0),
     m_shape(std::move(shape)),
     m_invMass(0.0),
     m_invInertia(0.0),
@@ -72,10 +68,12 @@ AABB Body::globalAABBWithMargin() const
     return m_shape->calcTransformedAABBWithMargin(m_transform);
 }
 
+
 std::vector<Vector2> Body::globalPoints() const
 {
     return m_shape->transformedPoints(m_transform);
 }
+
 
 const std::vector<Vector2>& Body::localPoints() const
 {
@@ -90,36 +88,12 @@ bool Body::overlaps(Vector2 point) const
 }
 
 
-void Body::updatePosition(double maxDisplacement, double maxRotation)
+void Body::updatePosition(Vector2 displacement, double rotation)
 {
-    //Positions are updated assuming a unit time step and application of impulses at the beginning of the time step.
-    //Velocity data is not stored.
-
-    for (int i = 0; i < 2; i++)
-    {
-        if (std::abs(m_linearVelocityChangeImpulse[i]) > maxDisplacement)
-        {
-            double dispX = m_linearVelocityChangeImpulse[i];
-            double dispConstr = dispX * maxDisplacement / std::abs(dispX);
-            m_linearVelocityChangeImpulse[i] = dispConstr;
-        }
-    }
-
-    if (std::abs(m_angularVelocityChangeImpulse) > maxRotation)
-    {
-        double rotConstr = m_angularVelocityChangeImpulse * maxRotation 
-            / std::abs(m_angularVelocityChangeImpulse);
-        m_angularVelocityChangeImpulse = rotConstr;
-    }
-
-
     if (!isStatic()) //mass = 0 indicates a static body
     {
-        m_transform.multiply(m_linearVelocityChangeImpulse, m_angularVelocityChangeImpulse);
+        m_transform.multiply(displacement, rotation);
     }
-
-    m_linearVelocityChangeImpulse.setZero();
-    m_angularVelocityChangeImpulse = 0.0;
 }
 
 
@@ -133,7 +107,6 @@ void Body::setMargin(double margin)
 {
     m_shape->setCollisionMargin(margin);
 }
-
 
 
 std::vector<Contact> Body::contactProperties(const Body& otherBody) const
